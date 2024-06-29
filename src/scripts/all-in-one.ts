@@ -51,7 +51,10 @@ import {handleError} from '../common/util';
     removeScrollControl(d);
     import('./score-download');
     import('./analyze-rating-in-newtab');
-  } else if (path.indexOf('/maimai-mobile/photo/') >= 0) {
+  } else if (
+    path.indexOf('/maimai-mobile/photo/') >= 0 ||
+    path.indexOf('/maimai-mobile/playerData/photo/') >= 0
+  ) {
     import('./album-download-helper');
   }
 })(document);
