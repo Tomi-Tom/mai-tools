@@ -73,8 +73,8 @@ interface State {
   finaleBorder: Map<string, number>;
   pctPerNoteType: Map<string, number>;
   playerScorePerType: ScorePerType;
+  dxAchvPerType: ScorePerType;
   judgementDisplayMap: Map<FullNoteType, Record<Judgement, number>>;
-  dxAchvPerType: Map<string, number>;
   apFcStatus: string | null;
   achvLossDetail: {
     dx: Map<FullNoteType, Record<Judgement | 'total', number>>;
@@ -82,7 +82,7 @@ interface State {
   };
 }
 export class ScorePageContainer extends React.PureComponent<Props, State> {
-  static getDerivedStateFromProps(nextProps: Props) {
+  static getDerivedStateFromProps(nextProps: Props): State {
     const info = calculateScoreInfo(nextProps.noteJudgements, nextProps.achievement);
     const judgementDisplayMap = calculateJudgementDisplayMap(nextProps.noteJudgements);
     const apFcStatus = calculateApFcStatus(judgementDisplayMap.get('total'), info.finaleBorder);

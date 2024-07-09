@@ -37,7 +37,7 @@ interface ScorePageProps {
   breakDistribution: BreakScoreMap;
   pctPerNoteType: Map<string, number>;
   playerScorePerType: ScorePerType;
-  dxAchvPerType: Map<string, number>;
+  dxAchvPerType: ScorePerType;
   apFcStatus: string | null;
   achvLossDetail: {
     dx: Map<FullNoteType, Record<Judgement | 'total', number>>;
@@ -65,14 +65,12 @@ export const ScorePage = (props: ScorePageProps) => {
     finaleAchievement,
     maxFinaleScore,
     breakDistribution,
-    playerScorePerType,
   } = props;
   const gameVerStr = new URLSearchParams(window.location.search).get(QueryParam.GameVersion);
   const gameVer = validateGameVersion(gameVerStr, 0);
   const [isDxMode, setIsDxMode] = useState(gameVer >= GameVersion.DX);
   const [showDetail, setShowDetail] = useState(true);
   const noteLoss = getNoteLoss(isDxMode, props.achvLossDetail);
-  const displayScorePerType = getDisplayScorePerType(isDxMode, showDetail, props);
 
   const toggleDxMode = useCallback(() => {
     setIsDxMode(!isDxMode);
@@ -108,7 +106,7 @@ export const ScorePage = (props: ScorePageProps) => {
           judgementDisplayMap={judgementDisplayMap}
           noteLoss={noteLoss}
           breakDistribution={breakDistribution}
-          scorePerType={displayScorePerType || playerScorePerType}
+          scorePerType={getDisplayScorePerType(isDxMode, showDetail, props)}
           nextRank={getNextRankEntry(isDxMode, props)}
           combo={combo}
           isDxMode={isDxMode}
@@ -167,7 +165,7 @@ function getDisplayScorePerType(
   isDxMode: boolean,
   showDetail: boolean,
   props: Pick<ScorePageProps, 'achvLossDetail' | 'dxAchvPerType' | 'playerScorePerType'>
-) {
+): ScorePerType {
   const lossDetail = isDxMode ? props.achvLossDetail.dx : props.achvLossDetail.finale;
   if (showDetail) {
     const digits = isDxMode ? 4 : 0;
