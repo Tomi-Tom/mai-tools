@@ -1,30 +1,36 @@
 import React from 'react';
 
+import {EMPTY_JUDGEMENT_OBJ} from '../constants';
 import {calculateScoreInfo} from '../scoreCalc';
 import {
   BreakScoreMap,
-  FullJudgementMap,
   FullNoteType,
   Judgement,
   NoteType,
   ScorePerType,
   StrictJudgement,
-  StrictJudgementMap,
 } from '../types';
 import {ScorePage} from './ScorePage';
 
-function calculateTotalJudgements(noteJudgements: Map<NoteType, StrictJudgementMap>) {
-  const res: Record<Judgement, number> = {perfect: 0, great: 0, good: 0, miss: 0};
-  noteJudgements.forEach((noteJ) => {
+function calculateJudgementDisplayMap(
+  noteJudgements: Map<NoteType, Record<StrictJudgement, number>>
+): Map<FullNoteType, Record<Judgement, number>> {
+  const res: Map<FullNoteType, Record<Judgement, number>> = new Map();
+  const totalCount = {...EMPTY_JUDGEMENT_OBJ};
+  noteJudgements.forEach((noteJ, noteType) => {
+    res.set(noteType, {
+      perfect: noteJ.cp + noteJ.perfect,
+      great: noteJ.great,
+      good: noteJ.good,
+      miss: noteJ.miss,
+    });
+    // Update total judgement count
     Object.keys(noteJ).forEach((rawJ) => {
-      let j = rawJ as StrictJudgement;
-      const count = noteJ[j];
-      if (j === 'cp') {
-        j = 'perfect';
-      }
-      res[j] += count;
+      const j = rawJ as StrictJudgement;
+      totalCount[j === 'cp' ? 'perfect' : j] += noteJ[j];
     });
   });
+  res.set('total', totalCount);
   return res;
 }
 
@@ -48,7 +54,7 @@ interface Props {
   songTitle: string;
   songImgSrc?: string;
   achievement: number;
-  noteJudgements: Map<NoteType, StrictJudgementMap>;
+  noteJudgements: Map<NoteType, Record<StrictJudgement, number>>;
   difficulty?: string;
   track: string;
   date: string;
@@ -67,20 +73,20 @@ interface State {
   finaleBorder: Map<string, number>;
   pctPerNoteType: Map<string, number>;
   playerScorePerType: ScorePerType;
-  totalJudgements: Record<Judgement, number>;
+  judgementDisplayMap: Map<FullNoteType, Record<Judgement, number>>;
   dxAchvPerType: Map<string, number>;
   apFcStatus: string | null;
   achvLossDetail: {
-    dx: Map<FullNoteType, FullJudgementMap>;
-    finale: Map<FullNoteType, FullJudgementMap>;
+    dx: Map<FullNoteType, Record<Judgement | 'total', number>>;
+    finale: Map<FullNoteType, Record<Judgement | 'total', number>>;
   };
 }
 export class ScorePageContainer extends React.PureComponent<Props, State> {
   static getDerivedStateFromProps(nextProps: Props) {
     const info = calculateScoreInfo(nextProps.noteJudgements, nextProps.achievement);
-    const totalJudgements = calculateTotalJudgements(nextProps.noteJudgements);
-    const apFcStatus = calculateApFcStatus(totalJudgements, info.finaleBorder);
-    return {...info, totalJudgements, apFcStatus};
+    const judgementDisplayMap = calculateJudgementDisplayMap(nextProps.noteJudgements);
+    const apFcStatus = calculateApFcStatus(judgementDisplayMap.get('total'), info.finaleBorder);
+    return {...info, judgementDisplayMap, apFcStatus};
   }
 
   render() {

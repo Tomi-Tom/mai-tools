@@ -4,16 +4,7 @@ import {GameVersion, validateGameVersion} from '../../common/game-version';
 import {formatFloat} from '../../common/number-helper';
 import {QueryParam} from '../../common/query-params';
 import {getRankDefinitions, getRankIndexByAchievement} from '../../common/rank-functions';
-import {
-  BreakScoreMap,
-  FullJudgementMap,
-  FullNoteType,
-  Judgement,
-  JudgementDisplayMap,
-  NoteType,
-  ScorePerType,
-  StrictJudgementMap,
-} from '../types';
+import {BreakScoreMap, FullNoteType, Judgement, ScorePerType} from '../types';
 import {AchievementInfo} from './AchievementInfo';
 import {DateAndPlace} from './DateAndPlace';
 import {JudgementContainer} from './JudgementContainer';
@@ -37,7 +28,7 @@ interface ScorePageProps {
   finaleAchievement: number;
   finaleBorder: Map<string, number>;
   highScore?: boolean;
-  noteJudgements: Map<NoteType, StrictJudgementMap>;
+  judgementDisplayMap: Map<FullNoteType, Record<Judgement, number>>;
   rankImg: Map<string, string>;
   syncImg?: string;
   syncStatus?: string;
@@ -46,12 +37,11 @@ interface ScorePageProps {
   breakDistribution: BreakScoreMap;
   pctPerNoteType: Map<string, number>;
   playerScorePerType: ScorePerType;
-  totalJudgements: Record<Judgement, number>;
   dxAchvPerType: Map<string, number>;
   apFcStatus: string | null;
   achvLossDetail: {
-    dx: Map<FullNoteType, FullJudgementMap>;
-    finale: Map<FullNoteType, FullJudgementMap>;
+    dx: Map<FullNoteType, Record<Judgement | 'total', number>>;
+    finale: Map<FullNoteType, Record<Judgement | 'total', number>>;
   };
   fetchRankImage: (title: string) => void;
 }
@@ -68,14 +58,13 @@ export const ScorePage = (props: ScorePageProps) => {
     track,
     difficulty,
     songImgSrc,
-    noteJudgements,
+    judgementDisplayMap,
     combo,
     syncStatus,
     apFcStatus,
     finaleAchievement,
     maxFinaleScore,
     breakDistribution,
-    totalJudgements,
     playerScorePerType,
   } = props;
   const gameVerStr = new URLSearchParams(window.location.search).get(QueryParam.GameVersion);
@@ -116,10 +105,9 @@ export const ScorePage = (props: ScorePageProps) => {
           fetchRankImage={props.fetchRankImage}
         />
         <JudgementContainer
-          noteJudgements={noteJudgements}
+          judgementDisplayMap={judgementDisplayMap}
           noteLoss={noteLoss}
           breakDistribution={breakDistribution}
-          totalJudgements={totalJudgements}
           scorePerType={displayScorePerType || playerScorePerType}
           nextRank={getNextRankEntry(isDxMode, props)}
           combo={combo}
@@ -163,7 +151,7 @@ function getNextRankEntry(
 function getNoteLoss(isDxMode: boolean, achvLossDetail: ScorePageProps['achvLossDetail']) {
   const lossDetail = isDxMode ? achvLossDetail.dx : achvLossDetail.finale;
   const digits = isDxMode ? 2 : 0;
-  const map = new Map<FullNoteType, JudgementDisplayMap>();
+  const map = new Map<FullNoteType, Record<Judgement, string>>();
   lossDetail.forEach((d, noteType) => {
     map.set(noteType, {
       perfect: formatLossNumber(d.perfect, digits),

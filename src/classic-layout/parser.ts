@@ -1,6 +1,6 @@
-import {NoteType, StrictJudgementMap} from './types';
+import {NoteType, StrictJudgement} from './types';
 
-const ZERO_JUDGEMENT: StrictJudgementMap = {
+const ZERO_JUDGEMENT: Record<StrictJudgement, number> = {
   cp: 0,
   perfect: 0,
   great: 0,
@@ -8,7 +8,10 @@ const ZERO_JUDGEMENT: StrictJudgementMap = {
   miss: 0,
 };
 
-function parseNumArrayFromText(line: string, fallback: StrictJudgementMap): StrictJudgementMap {
+function parseNumArrayFromText(
+  line: string,
+  fallback: Record<StrictJudgement, number>
+): Record<StrictJudgement, number> {
   const textArr = line.match(/\d+/g);
   if (!textArr) {
     return fallback;
@@ -23,7 +26,7 @@ function parseNumArrayFromText(line: string, fallback: StrictJudgementMap): Stri
   return {cp: 0, perfect: numArr[0], great: numArr[1], good: numArr[2], miss: numArr[3]};
 }
 
-export function parseJudgements(text: string): Map<NoteType, StrictJudgementMap> {
+export function parseJudgements(text: string): Map<NoteType, Record<StrictJudgement, number>> {
   let jTextLines = text.split('_');
   if (jTextLines.length === 1) {
     jTextLines = text.split('\n');

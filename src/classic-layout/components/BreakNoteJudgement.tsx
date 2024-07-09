@@ -1,11 +1,11 @@
 import React from 'react';
 
-import {JudgementDisplayMap} from '../types';
+import {Judgement} from '../types';
 import {getLastColumnText, NoteJudgement} from './NoteJudgement';
 
 interface BreakNoteJudgementProps {
-  judgements: JudgementDisplayMap;
-  loss: JudgementDisplayMap;
+  judgements: Record<Judgement, number>;
+  loss: Record<Judgement, string>;
   distribution: Map<number, number>;
   lastColumn: {score: number | string; isMax: boolean};
   isDxMode: boolean;

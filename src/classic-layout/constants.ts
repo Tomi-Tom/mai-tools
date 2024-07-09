@@ -1,4 +1,4 @@
-import {BreakScore, BreakScoreMap, Judgement, NoteType, StrictJudgementMap} from './types';
+import {BreakScore, BreakScoreMap, Judgement, NoteType, StrictJudgement} from './types';
 
 export const DX_NOTE_TYPES: ReadonlyArray<NoteType> = ['tap', 'hold', 'slide', 'touch', 'break'];
 
@@ -9,7 +9,7 @@ export const BASE_SCORE_PER_TYPE: Readonly<Record<NoteType, number>> = {
   slide: 1500,
   break: 2500,
 };
-export const REGULAR_BASE_SCORE_MULTIPLIER: StrictJudgementMap = {
+export const REGULAR_BASE_SCORE_MULTIPLIER: Record<StrictJudgement, number> = {
   cp: 1,
   perfect: 1,
   great: 0.8,

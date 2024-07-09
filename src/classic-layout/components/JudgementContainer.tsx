@@ -1,21 +1,14 @@
 import React from 'react';
 
-import {
-  BreakScoreMap,
-  FullNoteType,
-  JudgementDisplayMap,
-  ScorePerType,
-  StrictJudgementMap,
-} from '../types';
+import {BreakScoreMap, FullNoteType, Judgement, ScorePerType} from '../types';
 import {BreakNoteJudgement} from './BreakNoteJudgement';
 import {NextRankInfo} from './NextRankInfo';
 import {NoteJudgement} from './NoteJudgement';
 
 interface JudgementContainerProps {
-  noteJudgements: Map<FullNoteType, JudgementDisplayMap | StrictJudgementMap>;
-  noteLoss: Map<FullNoteType, JudgementDisplayMap>;
+  judgementDisplayMap: Map<FullNoteType, Record<Judgement, number>>;
+  noteLoss: Map<FullNoteType, Record<Judgement, string>>;
   breakDistribution: BreakScoreMap;
-  totalJudgements: JudgementDisplayMap;
   scorePerType: ScorePerType;
   nextRank?: {title: string; diff: number};
   combo?: string;
@@ -30,11 +23,10 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
       combo,
       isDxMode,
       nextRank,
-      noteJudgements,
+      judgementDisplayMap,
       noteLoss,
       scorePerType,
       showDetail,
-      totalJudgements,
     } = this.props;
     return (
       <div className="judgementContainer">
@@ -50,7 +42,7 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
             </tr>
             <NoteJudgement
               noteType="total"
-              judgements={totalJudgements}
+              judgements={judgementDisplayMap.get('total')}
               loss={noteLoss.get('total')}
               lastColumn={scorePerType.get('total')}
               isDxMode={isDxMode}
@@ -72,7 +64,7 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
             </tr>
             <NoteJudgement
               noteType="tap"
-              judgements={noteJudgements.get('tap')}
+              judgements={judgementDisplayMap.get('tap')}
               loss={noteLoss.get('tap')}
               lastColumn={scorePerType.get('tap')}
               isDxMode={isDxMode}
@@ -80,7 +72,7 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
             />
             <NoteJudgement
               noteType="hold"
-              judgements={noteJudgements.get('hold')}
+              judgements={judgementDisplayMap.get('hold')}
               loss={noteLoss.get('hold')}
               lastColumn={scorePerType.get('hold')}
               isDxMode={isDxMode}
@@ -88,7 +80,7 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
             />
             <NoteJudgement
               noteType="slide"
-              judgements={noteJudgements.get('slide')}
+              judgements={judgementDisplayMap.get('slide')}
               loss={noteLoss.get('slide')}
               lastColumn={scorePerType.get('slide')}
               isDxMode={isDxMode}
@@ -96,14 +88,14 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
             />
             <NoteJudgement
               noteType="touch"
-              judgements={noteJudgements.get('touch')}
+              judgements={judgementDisplayMap.get('touch')}
               loss={noteLoss.get('touch')}
               lastColumn={scorePerType.get('touch')}
               isDxMode={isDxMode}
               showDetail={showDetail}
             />
             <BreakNoteJudgement
-              judgements={noteJudgements.get('break')}
+              judgements={judgementDisplayMap.get('break')}
               loss={noteLoss.get('break')}
               distribution={breakDistribution}
               lastColumn={scorePerType.get('break')}

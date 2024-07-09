@@ -5,7 +5,7 @@ import {getDifficultyName} from '../../common/difficulties';
 import {isMaimaiNetOrigin, MAIMAI_NET_ORIGINS} from '../../common/game-region';
 import {QueryParam} from '../../common/query-params';
 import {parseJudgements} from '../parser';
-import {NoteType, StrictJudgementMap} from '../types';
+import {NoteType, StrictJudgement} from '../types';
 import {CreditInfo} from './CreditInfo';
 import {PageFooter} from './PageFooter';
 import {PageTitle} from './PageTitle';
@@ -67,7 +67,7 @@ function parseQueryParams(qp: URLSearchParams, dft = defaultPlayRecord) {
 interface RootComponentState {
   songTitle: string;
   achievement: number;
-  noteJudgements: Map<NoteType, StrictJudgementMap>;
+  noteJudgements: Map<NoteType, Record<StrictJudgement, number>>;
   difficulty?: string;
   track: string;
   date: string;

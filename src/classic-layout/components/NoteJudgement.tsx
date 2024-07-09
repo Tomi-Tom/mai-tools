@@ -1,15 +1,7 @@
 import React from 'react';
 
 import {formatFloat} from '../../common/number-helper';
-import {JudgementDisplayMap, StrictJudgementMap} from '../types';
-
-function getPerfectCount(j: JudgementDisplayMap | StrictJudgementMap) {
-  const cpV = (j as StrictJudgementMap).cp;
-  if (cpV) {
-    return cpV + (j.perfect as number);
-  }
-  return j.perfect;
-}
+import {Judgement} from '../types';
 
 export function getLastColumnText(score: number | string, isDxMode: boolean) {
   if (typeof score === 'string') {
@@ -21,8 +13,8 @@ export function getLastColumnText(score: number | string, isDxMode: boolean) {
 
 interface NoteJudgementProps {
   noteType: string;
-  judgements: JudgementDisplayMap | StrictJudgementMap;
-  loss: JudgementDisplayMap;
+  judgements: Record<Judgement, number>;
+  loss: Record<Judgement, string>;
   lastColumn: {score: number | string; isMax: boolean};
   isDxMode: boolean;
   showDetail: boolean;
@@ -35,12 +27,11 @@ export class NoteJudgement extends React.PureComponent<NoteJudgementProps> {
     }
     const heading = noteType.charAt(0).toUpperCase() + noteType.substring(1);
     const scoreClass = lastColumn.isMax ? 'score maxScore' : 'score';
-    const perfectCount = getPerfectCount(judgements);
     return (
       <tr>
         <th className="rowHead">{heading}</th>
         <td className="perfect">
-          {perfectCount}
+          {judgements.perfect}
           {showDetail ? <p>{loss.perfect}</p> : ''}
         </td>
         <td className="great">

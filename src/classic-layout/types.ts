@@ -6,6 +6,3 @@ export type ScorePerType = Map<FullNoteType, {score: number | string; isMax: boo
 
 export type Judgement = 'perfect' | 'great' | 'good' | 'miss';
 export type StrictJudgement = 'cp' | Judgement;
-export type FullJudgementMap = Record<Judgement | 'total', number>;
-export type JudgementDisplayMap = Record<Judgement, number | string>;
-export type StrictJudgementMap = Record<StrictJudgement, number>;
