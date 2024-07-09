@@ -83,7 +83,7 @@ export function calculateScoreInfo(
     basePercentagePerBreak
   );
   console.log('valid break distributions', validBreakDistributions);
-  let breakDistribution = validBreakDistributions[0];
+  let breakDistribution = validBreakDistributions[Math.floor(validBreakDistributions.length / 2)];
   if (!breakDistribution) {
     console.warn('Could not find a valid break distribution!');
     console.warn('Please report the issue to the developer.');
