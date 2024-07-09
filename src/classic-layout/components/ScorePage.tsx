@@ -1,16 +1,15 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 
 import {GameVersion, validateGameVersion} from '../../common/game-version';
 import {formatFloat} from '../../common/number-helper';
 import {QueryParam} from '../../common/query-params';
 import {getRankDefinitions, getRankIndexByAchievement} from '../../common/rank-functions';
-import {DisplayMode} from '../constants';
 import {
   BreakScoreMap,
   FullJudgementMap,
   FullNoteType,
+  Judgement,
   JudgementDisplayMap,
-  JudgementMap,
   NoteType,
   ScorePerType,
   StrictJudgementMap,
@@ -21,24 +20,10 @@ import {JudgementContainer} from './JudgementContainer';
 import {SongImg} from './SongImg';
 import {SongInfo} from './SongInfo';
 
-const LOSS_PREFIX = '-';
-
-function getNextDisplayMode(m: DisplayMode): DisplayMode {
-  switch (m) {
-    case DisplayMode.NORMAL:
-      return DisplayMode.LOSS;
-    case DisplayMode.LOSS:
-      return DisplayMode.DETAIL;
-    default:
-      return DisplayMode.NORMAL;
-  }
-}
-
 function formatLossNumber(loss: number, digits: number) {
-  if (digits) {
-    return LOSS_PREFIX + formatFloat(loss, digits) + '%';
-  }
-  return LOSS_PREFIX + loss.toLocaleString('en');
+  return loss == 0
+    ? ''
+    : '-' + (digits ? formatFloat(loss, digits) + '%' : loss.toLocaleString('en'));
 }
 
 interface ScorePageProps {
@@ -61,7 +46,7 @@ interface ScorePageProps {
   breakDistribution: BreakScoreMap;
   pctPerNoteType: Map<string, number>;
   playerScorePerType: ScorePerType;
-  totalJudgements: JudgementMap;
+  totalJudgements: Record<Judgement, number>;
   dxAchvPerType: Map<string, number>;
   apFcStatus: string | null;
   achvLossDetail: {
@@ -96,17 +81,17 @@ export const ScorePage = (props: ScorePageProps) => {
   const gameVerStr = new URLSearchParams(window.location.search).get(QueryParam.GameVersion);
   const gameVer = validateGameVersion(gameVerStr, 0);
   const [isDxMode, setIsDxMode] = useState(gameVer >= GameVersion.DX);
-  const [displayMode, setDisplayMode] = useState(DisplayMode.LOSS);
-  const displayNoteJudgements = getNoteJudgementLoss(isDxMode, displayMode, props.achvLossDetail);
-  const displayScorePerType = getDisplayScorePerType(isDxMode, displayMode, props);
+  const [showDetail, setShowDetail] = useState(true);
+  const noteLoss = getNoteLoss(isDxMode, props.achvLossDetail);
+  const displayScorePerType = getDisplayScorePerType(isDxMode, showDetail, props);
 
-  const toggleDxMode = () => {
+  const toggleDxMode = useCallback(() => {
     setIsDxMode(!isDxMode);
-  };
+  }, [isDxMode, setIsDxMode]);
 
-  const toggleDisplayMode = () => {
-    setDisplayMode(getNextDisplayMode(displayMode));
-  };
+  const toggleDisplayMode = useCallback(() => {
+    setShowDetail(!showDetail);
+  }, [showDetail, setShowDetail]);
 
   return (
     <div className="songScoreContainer">
@@ -126,21 +111,20 @@ export const ScorePage = (props: ScorePageProps) => {
           dxAchv={achievement}
           finaleAchv={finaleAchievement}
           maxFinaleAchv={maxFinaleScore}
-          showMaxAchv={displayMode !== DisplayMode.NORMAL}
+          showMaxAchv={showDetail}
           toggleDisplayMode={toggleDisplayMode}
           fetchRankImage={props.fetchRankImage}
         />
         <JudgementContainer
-          noteJudgements={displayNoteJudgements || noteJudgements}
+          noteJudgements={noteJudgements}
+          noteLoss={noteLoss}
           breakDistribution={breakDistribution}
-          totalJudgements={
-            displayNoteJudgements ? displayNoteJudgements.get('total') : totalJudgements
-          }
+          totalJudgements={totalJudgements}
           scorePerType={displayScorePerType || playerScorePerType}
           nextRank={getNextRankEntry(isDxMode, props)}
           combo={combo}
           isDxMode={isDxMode}
-          displayMode={displayMode}
+          showDetail={showDetail}
         />
       </div>
     </div>
@@ -176,34 +160,28 @@ function getNextRankEntry(
   return nextRank;
 }
 
-function getNoteJudgementLoss(
-  isDxMode: boolean,
-  displayMode: DisplayMode,
-  achvLossDetail: ScorePageProps['achvLossDetail']
-) {
-  if (displayMode === DisplayMode.LOSS) {
-    const lossDetail = isDxMode ? achvLossDetail.dx : achvLossDetail.finale;
-    const digits = isDxMode ? 2 : 0;
-    const map = new Map<FullNoteType, JudgementDisplayMap>();
-    lossDetail.forEach((d, noteType) => {
-      map.set(noteType, {
-        perfect: formatLossNumber(d.perfect, digits),
-        great: formatLossNumber(d.great, digits),
-        good: formatLossNumber(d.good, digits),
-        miss: formatLossNumber(d.miss, digits),
-      });
+function getNoteLoss(isDxMode: boolean, achvLossDetail: ScorePageProps['achvLossDetail']) {
+  const lossDetail = isDxMode ? achvLossDetail.dx : achvLossDetail.finale;
+  const digits = isDxMode ? 2 : 0;
+  const map = new Map<FullNoteType, JudgementDisplayMap>();
+  lossDetail.forEach((d, noteType) => {
+    map.set(noteType, {
+      perfect: formatLossNumber(d.perfect, digits),
+      great: formatLossNumber(d.great, digits),
+      good: formatLossNumber(d.good, digits),
+      miss: formatLossNumber(d.miss, digits),
     });
-    return map;
-  }
+  });
+  return map;
 }
 
 function getDisplayScorePerType(
   isDxMode: boolean,
-  displayMode: DisplayMode,
+  showDetail: boolean,
   props: Pick<ScorePageProps, 'achvLossDetail' | 'dxAchvPerType' | 'playerScorePerType'>
 ) {
   const lossDetail = isDxMode ? props.achvLossDetail.dx : props.achvLossDetail.finale;
-  if (displayMode === DisplayMode.LOSS) {
+  if (showDetail) {
     const digits = isDxMode ? 4 : 0;
     const displayScorePerType = new Map();
     lossDetail.forEach((detail, noteType) => {

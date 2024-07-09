@@ -8,13 +8,7 @@ import {
   REGULAR_BASE_SCORE_MULTIPLIER,
 } from './constants';
 import {convertJudgementsToArray} from './judgementsHelper';
-import {
-  BreakScoreMap,
-  FullNoteType,
-  NoteType,
-  StrictJudgementMap,
-  StrictJudgementType,
-} from './types';
+import {BreakScoreMap, FullNoteType, NoteType, StrictJudgement} from './types';
 
 function calculateBorder(
   totalBaseScore: number,
@@ -40,7 +34,7 @@ function calculateBorder(
  * @return various properties of playerScore
  */
 export function calculateScoreInfo(
-  judgementsPerType: Map<NoteType, StrictJudgementMap>,
+  judgementsPerType: Map<NoteType, Record<StrictJudgement, number>>,
   playerAchievement: number
 ) {
   let totalBaseScore = 0;
@@ -63,7 +57,7 @@ export function calculateScoreInfo(
     if (noteType !== 'break') {
       let playerNoteScore = 0;
       Object.keys(judgements).forEach((_j) => {
-        const j = _j as StrictJudgementType;
+        const j = _j as StrictJudgement;
         const count = judgements[j];
         playerNoteScore += count * noteBaseScore * REGULAR_BASE_SCORE_MULTIPLIER[j];
       });

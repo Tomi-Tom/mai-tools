@@ -380,6 +380,12 @@ button:focus {
   font-weight: 700;
 }
 
+/** Loss score or percentage */
+.judgement p {
+  margin: 0;
+  height: 20px;
+}
+
 .rowHead {
   width: 48px;
 }
@@ -409,55 +415,6 @@ td.good,
 td.miss,
 td.score {
   text-align: right;
-}
-
-.breakDistribution {
-  display: flex;
-}
-
-.breakDistribution span {
-  flex: 3 1 20px;
-  text-align: center;
-  padding-left: 3px;
-  position: relative;
-}
-
-.breakDistribution .perfect,
-.breakDistribution .great {
-  flex-grow: 1;
-}
-
-.breakNoteRow .miss {
-  position: relative;
-  text-align: right;
-}
-
-.breakDistribution .perfect:after,
-.breakDistribution .great:after,
-.missWithBefore:before {
-  content: '-';
-  position: absolute;
-  right: -5px;
-  color: #888;
-  opacity: 0.3;
-}
-
-.missWithBefore:before {
-  position: static;
-  padding-right: 26px;
-}
-
-.breakDistribution .good {
-  text-align: right;
-  padding-right: 1px;
-}
-
-.judgement .noLeftBorder {
-  border-left-style: none;
-}
-
-.judgement .noRightBorder {
-  border-right-style: none;
 }
 
 .nextRank td,

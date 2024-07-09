@@ -1,6 +1,5 @@
 import React from 'react';
 
-import {DisplayMode} from '../constants';
 import {
   BreakScoreMap,
   FullNoteType,
@@ -14,21 +13,28 @@ import {NoteJudgement} from './NoteJudgement';
 
 interface JudgementContainerProps {
   noteJudgements: Map<FullNoteType, JudgementDisplayMap | StrictJudgementMap>;
+  noteLoss: Map<FullNoteType, JudgementDisplayMap>;
   breakDistribution: BreakScoreMap;
   totalJudgements: JudgementDisplayMap;
   scorePerType: ScorePerType;
-  nextRank?: {title: string, diff: number};
+  nextRank?: {title: string; diff: number};
   combo?: string;
   isDxMode: boolean;
-  displayMode: DisplayMode;
+  showDetail: boolean;
 }
 
 export class JudgementContainer extends React.PureComponent<JudgementContainerProps> {
   render() {
     const {
-      nextRank, noteJudgements, breakDistribution,
-      totalJudgements, scorePerType, combo,
-      isDxMode, displayMode
+      breakDistribution,
+      combo,
+      isDxMode,
+      nextRank,
+      noteJudgements,
+      noteLoss,
+      scorePerType,
+      showDetail,
+      totalJudgements,
     } = this.props;
     return (
       <div className="judgementContainer">
@@ -45,14 +51,20 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
             <NoteJudgement
               noteType="total"
               judgements={totalJudgements}
-              lastColumn={scorePerType.get("total")}
+              loss={noteLoss.get('total')}
+              lastColumn={scorePerType.get('total')}
               isDxMode={isDxMode}
+              showDetail={showDetail}
             />
-            <NextRankInfo nextRank={nextRank} showTitle={displayMode !== DisplayMode.NORMAL} />
+            <NextRankInfo nextRank={nextRank} showTitle={showDetail} />
             {combo && (
               <tr className="maxCombo">
-                <th className="noRightBorder" colSpan={4}>MAX COMBO</th>
-                <td className="noLeftBorder" colSpan={2}>{combo}</td>
+                <th className="noRightBorder" colSpan={4}>
+                  MAX COMBO
+                </th>
+                <td className="noLeftBorder" colSpan={2}>
+                  {combo}
+                </td>
               </tr>
             )}
             <tr className="tableSeparator">
@@ -60,34 +72,43 @@ export class JudgementContainer extends React.PureComponent<JudgementContainerPr
             </tr>
             <NoteJudgement
               noteType="tap"
-              judgements={noteJudgements.get("tap")}
-              lastColumn={scorePerType.get("tap")}
+              judgements={noteJudgements.get('tap')}
+              loss={noteLoss.get('tap')}
+              lastColumn={scorePerType.get('tap')}
               isDxMode={isDxMode}
+              showDetail={showDetail}
             />
             <NoteJudgement
               noteType="hold"
-              judgements={noteJudgements.get("hold")}
-              lastColumn={scorePerType.get("hold")}
+              judgements={noteJudgements.get('hold')}
+              loss={noteLoss.get('hold')}
+              lastColumn={scorePerType.get('hold')}
               isDxMode={isDxMode}
+              showDetail={showDetail}
             />
             <NoteJudgement
               noteType="slide"
-              judgements={noteJudgements.get("slide")}
-              lastColumn={scorePerType.get("slide")}
+              judgements={noteJudgements.get('slide')}
+              loss={noteLoss.get('slide')}
+              lastColumn={scorePerType.get('slide')}
               isDxMode={isDxMode}
+              showDetail={showDetail}
             />
             <NoteJudgement
               noteType="touch"
-              judgements={noteJudgements.get("touch")}
-              lastColumn={scorePerType.get("touch")}
+              judgements={noteJudgements.get('touch')}
+              loss={noteLoss.get('touch')}
+              lastColumn={scorePerType.get('touch')}
               isDxMode={isDxMode}
+              showDetail={showDetail}
             />
             <BreakNoteJudgement
-              judgements={noteJudgements.get("break")}
+              judgements={noteJudgements.get('break')}
+              loss={noteLoss.get('break')}
               distribution={breakDistribution}
-              lastColumn={scorePerType.get("break")}
+              lastColumn={scorePerType.get('break')}
               isDxMode={isDxMode}
-              displayMode={displayMode}
+              showDetail={showDetail}
             />
           </tbody>
         </table>

@@ -5,23 +5,22 @@ import {
   BreakScoreMap,
   FullJudgementMap,
   FullNoteType,
-  JudgementMap,
-  JudgementType,
+  Judgement,
   NoteType,
   ScorePerType,
+  StrictJudgement,
   StrictJudgementMap,
-  StrictJudgementType,
 } from '../types';
 import {ScorePage} from './ScorePage';
 
 function calculateTotalJudgements(noteJudgements: Map<NoteType, StrictJudgementMap>) {
-  const res: {[j in JudgementType]: number} = {perfect: 0, great: 0, good: 0, miss: 0};
+  const res: Record<Judgement, number> = {perfect: 0, great: 0, good: 0, miss: 0};
   noteJudgements.forEach((noteJ) => {
     Object.keys(noteJ).forEach((rawJ) => {
-      let j = rawJ as StrictJudgementType;
+      let j = rawJ as StrictJudgement;
       const count = noteJ[j];
-      if (j === "cp") {
-        j = "perfect";
+      if (j === 'cp') {
+        j = 'perfect';
       }
       res[j] += count;
     });
@@ -30,19 +29,19 @@ function calculateTotalJudgements(noteJudgements: Map<NoteType, StrictJudgementM
 }
 
 function calculateApFcStatus(
-  totalJudgements: {[j in JudgementType]: number},
-  finaleBorder: Map<string, number>,
+  totalJudgements: Record<Judgement, number>,
+  finaleBorder: Map<string, number>
 ) {
   if (totalJudgements.miss) {
     return null;
-  } else if (finaleBorder.get("AP+") === 0) {
-    return "AP+";
+  } else if (finaleBorder.get('AP+') === 0) {
+    return 'AP+';
   } else if (totalJudgements.good) {
-    return "FC";
+    return 'FC';
   } else if (totalJudgements.great) {
-    return "FC+";
+    return 'FC+';
   }
-  return "AP";
+  return 'AP';
 }
 
 interface Props {
@@ -68,10 +67,13 @@ interface State {
   finaleBorder: Map<string, number>;
   pctPerNoteType: Map<string, number>;
   playerScorePerType: ScorePerType;
-  totalJudgements: JudgementMap;
+  totalJudgements: Record<Judgement, number>;
   dxAchvPerType: Map<string, number>;
   apFcStatus: string | null;
-  achvLossDetail: {dx: Map<FullNoteType, FullJudgementMap>, finale: Map<FullNoteType, FullJudgementMap>};
+  achvLossDetail: {
+    dx: Map<FullNoteType, FullJudgementMap>;
+    finale: Map<FullNoteType, FullJudgementMap>;
+  };
 }
 export class ScorePageContainer extends React.PureComponent<Props, State> {
   static getDerivedStateFromProps(nextProps: Props) {
