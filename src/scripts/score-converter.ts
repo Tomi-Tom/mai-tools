@@ -176,7 +176,7 @@ import {ALLOWED_ORIGINS} from '../common/util';
     return Promise.resolve(null);
   }
 
-  function addLinkToPlace(link: string) {
+  function addAnalyzeLink(link: string) {
     let ratingBlock = d.querySelector('.playlog_rating_detail_block');
     if (!ratingBlock) {
       return;
@@ -206,12 +206,16 @@ import {ALLOWED_ORIGINS} from '../common/util';
       [QueryParam.NoteDetails]: getNoteDetails(d.body),
       [QueryParam.Combo]: getCombo(d.body),
     });
-    let url = BASE_NEWTAB_URL + '?' + queryParams.toString();
     const syncStatus = getSyncResult(d.body);
     if (syncStatus) {
-      url += '&sc=' + encodeURIComponent(syncStatus);
+      queryParams.set(QueryParam.SyncStatus, syncStatus);
     }
-    addLinkToPlace(url);
+    const place = d.getElementById('placeName');
+    if (place) {
+      queryParams.set(QueryParam.Place, place.innerText);
+    }
+    const url = BASE_NEWTAB_URL + '?' + queryParams.toString();
+    addAnalyzeLink(url);
     window.addEventListener('message', (evt) => {
       if (ALLOWED_ORIGINS.includes(evt.origin)) {
         const data = evt.data;

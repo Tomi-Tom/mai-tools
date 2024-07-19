@@ -41,6 +41,7 @@ function getQueryParam(qp: URLSearchParams, key: string, fallback?: string) {
 
 function parseQueryParams(qp: URLSearchParams, dft = defaultPlayRecord) {
   const date = getQueryParam(qp, QueryParam.Date, dft.date);
+  const place = getQueryParam(qp, QueryParam.Place, 'DX');
   const track = getQueryParam(qp, QueryParam.Track, dft.track);
   const rawDifficulty = getQueryParam(qp, QueryParam.Difficulty);
   const songTitle = getQueryParam(qp, QueryParam.SongTitle, dft.songTitle);
@@ -53,6 +54,7 @@ function parseQueryParams(qp: URLSearchParams, dft = defaultPlayRecord) {
   const difficulty = getDifficultyName(parseInt(rawDifficulty));
   return {
     date: formatDate(new Date(parseInt(date))),
+    place,
     track,
     songTitle,
     difficulty,
@@ -71,6 +73,7 @@ interface RootComponentState {
   difficulty?: string;
   track: string;
   date: string;
+  place: string;
   highScore?: boolean;
   combo?: string;
   syncStatus?: string;
@@ -114,6 +117,7 @@ export class RootComponent extends React.PureComponent<{}, RootComponentState> {
       achievement,
       combo,
       date,
+      place,
       difficulty,
       highScore,
       noteJudgements,
@@ -139,6 +143,7 @@ export class RootComponent extends React.PureComponent<{}, RootComponentState> {
                 achievement={achievement}
                 combo={combo}
                 date={date}
+                place={place}
                 difficulty={difficulty}
                 highScore={highScore}
                 noteJudgements={noteJudgements}

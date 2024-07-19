@@ -11,6 +11,7 @@ export const enum QueryParam {
   Combo = 'cb',
   NoteDetails = 'nd',
   SyncStatus = 'sc',
+  Place = 'place',
 
   // For dx-achievement (FiNALE -> DX score converter)
   AchievementOld = 'achv',

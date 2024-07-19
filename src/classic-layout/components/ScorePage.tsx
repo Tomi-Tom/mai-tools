@@ -24,6 +24,7 @@ interface ScorePageProps {
   apFcImg?: string;
   combo?: string;
   date: string;
+  place: string;
   difficulty?: string;
   finaleAchievement: number;
   finaleBorder: Map<string, number>;
@@ -54,6 +55,7 @@ export const ScorePage = (props: ScorePageProps) => {
     syncImg,
     highScore,
     date,
+    place,
     songTitle,
     track,
     difficulty,
@@ -82,7 +84,12 @@ export const ScorePage = (props: ScorePageProps) => {
 
   return (
     <div className="songScoreContainer">
-      <DateAndPlace date={date} isDxMode={isDxMode} toggleDxMode={toggleDxMode} />
+      <DateAndPlace
+        actualPlace={place}
+        date={date}
+        isDxMode={isDxMode}
+        toggleDxMode={toggleDxMode}
+      />
       <div className="songScoreBody">
         <hr className="trackTopLine" />
         <SongInfo songTitle={songTitle} track={track} difficulty={difficulty} />

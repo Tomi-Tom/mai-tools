@@ -383,7 +383,6 @@ button:focus {
 /** Loss score or percentage */
 .judgement p {
   margin: 0;
-  height: 20px;
 }
 
 .rowHead {

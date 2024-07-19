@@ -58,6 +58,7 @@ interface Props {
   difficulty?: string;
   track: string;
   date: string;
+  place: string;
   highScore?: boolean;
   combo?: string;
   syncStatus?: string;
