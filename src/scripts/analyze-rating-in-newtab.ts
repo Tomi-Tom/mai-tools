@@ -75,9 +75,10 @@ declare global {
     return allSongsDom;
   }
 
-  function insertAnalyzeButton(playerName: string) {
+  function insertAnalyzeButton(gameVer: GameVersion, playerName: string) {
     const region = getGameRegionFromOrigin(window.location.origin);
     const urlSearch = new URLSearchParams({
+      [QueryParam.GameVersion]: gameVer.toString(),
       [QueryParam.GameRegion]: region,
     });
     if (playerName) {
@@ -122,19 +123,19 @@ declare global {
     }
   }
 
-  function main() {
+  async function main() {
     if (!isMaimaiNetOrigin(document.location.origin)) {
       handleError(UIString[LANG].pleaseLogIn);
       return;
     }
+    const gameVer = await fetchGameVersion(document.body);
     const playerName = isOnFriendPage ? null : getPlayerName(document.body);
-    insertAnalyzeButton(playerName);
-    const gameVerPromise = fetchGameVersion(document.body);
+    insertAnalyzeButton(gameVer, playerName);
     let allSongsDom: Promise<Document>;
     if (window.ratingCalcMsgListener) {
       window.removeEventListener('message', window.ratingCalcMsgListener);
     }
-    window.ratingCalcMsgListener = async (
+    window.ratingCalcMsgListener = (
       evt: MessageEvent<string | {action: string; payload?: string | number}>
     ) => {
       console.log(evt.origin, evt.data);
@@ -142,17 +143,17 @@ declare global {
         const send = getPostMessageFunc(evt.source as WindowProxy, evt.origin);
         if (typeof evt.data === 'object') {
           if (evt.data.action === 'ready') {
-            send('gameVersion', await gameVerPromise);
+            send('gameVersion', gameVer);
             if (typeof evt.data.payload === 'string') {
               LANG = evt.data.payload as Language;
             }
-            allSongsDom = fetchSelfRecords(await gameVerPromise, send);
+            allSongsDom = fetchSelfRecords(gameVer, send);
             allSongsDom.then(fetchAllSongs).then((songs) => send('allSongs', songs));
           } else if (evt.data.action === 'fetchScoresFull') {
             if (typeof evt.data.payload === 'string') {
               LANG = evt.data.payload as Language;
             }
-            allSongsDom = fetchSelfRecords(await gameVerPromise, send, true);
+            allSongsDom = fetchSelfRecords(gameVer, send, true);
           } else if (evt.data.action === 'saveLanguage') {
             LANG = evt.data.payload as Language;
             saveLanguage(LANG);

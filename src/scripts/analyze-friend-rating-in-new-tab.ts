@@ -63,10 +63,11 @@ type FriendInfo = {
     return (n.querySelector('[name=idx]') as HTMLInputElement).value;
   }
 
-  function insertAnalyzeButton(friend: FriendInfo, container: HTMLElement) {
+  function insertAnalyzeButton(gameVer: GameVersion, friend: FriendInfo, container: HTMLElement) {
     const region = getGameRegionFromOrigin(window.location.origin);
     const queryParams = new URLSearchParams({
       [QueryParam.GameRegion]: region,
+      [QueryParam.GameVersion]: gameVer.toString(),
       [QueryParam.FriendIdx]: friend.idx,
       [QueryParam.PlayerName]: friend.name,
     });
@@ -140,11 +141,12 @@ type FriendInfo = {
     }
   }
 
-  function main() {
+  async function main() {
     if (!isMaimaiNetOrigin(document.location.origin)) {
       handleError(UIString[LANG].pleaseLogIn);
       return;
     }
+    const gameVer = await fetchGameVersion(document.body);
     if (
       location.pathname.includes('/friendLevelVs/') ||
       location.pathname.includes('/friendGenreVs/')
@@ -153,7 +155,7 @@ type FriendInfo = {
       const idx = new URLSearchParams(location.search).get('idx');
       const info = {idx, name: getPlayerName(elem), grade: '', page: FriendPage.FRIEND_VS};
       friends_cache[idx] = info;
-      insertAnalyzeButton(info, elem);
+      insertAnalyzeButton(gameVer, info, elem);
     } else if (location.pathname.includes('/friend/friendDetail/')) {
       const elem = document.querySelector('.see_through_block') as HTMLElement;
       const idx = new URLSearchParams(location.search).get('idx');
@@ -164,7 +166,7 @@ type FriendInfo = {
         page: FriendPage.FRIEND_DETAIL,
       };
       friends_cache[idx] = info;
-      insertAnalyzeButton(info, elem);
+      insertAnalyzeButton(gameVer, info, elem);
     } else {
       const list = Array.from(
         d.querySelectorAll('img.friend_favorite_icon') as NodeListOf<HTMLImageElement>
@@ -178,14 +180,13 @@ type FriendInfo = {
           page: FriendPage.FRIEND_LIST,
         };
         friends_cache[idx] = info;
-        insertAnalyzeButton(info, elem);
+        insertAnalyzeButton(gameVer, info, elem);
       });
     }
-    const gameVerPromise = fetchGameVersion(document.body);
     if (window.ratingCalcMsgListener) {
       window.removeEventListener('message', window.ratingCalcMsgListener);
     }
-    window.ratingCalcMsgListener = async (
+    window.ratingCalcMsgListener = (
       evt: MessageEvent<{action: string; payload?: string | number}>
     ) => {
       console.log(evt.origin, evt.data);
@@ -196,7 +197,6 @@ type FriendInfo = {
         }
 
         if (evt.data.action === 'getFriendRecords') {
-          const gameVer = await gameVerPromise;
           send('gameVersion', gameVer);
           const friend = friends_cache[evt.data.payload];
           if (friend) {
@@ -208,7 +208,7 @@ type FriendInfo = {
         } else if (evt.data.action === 'fetchFriendScoresFull') {
           const friend = friends_cache[evt.data.payload];
           if (friend) {
-            fetchFriendRecords(await gameVerPromise, friend, true, send);
+            fetchFriendRecords(gameVer, friend, true, send);
           }
         } else if (evt.data.action === 'saveLanguage') {
           LANG = evt.data.payload as Language;

@@ -8,7 +8,7 @@ import {
   isMaimaiNetOrigin,
   MAIMAI_NET_ORIGINS,
 } from '../common/game-region';
-import {GameVersion} from '../common/game-version';
+import {GameVersion, validateGameVersion} from '../common/game-version';
 import {getInitialLanguage, Language} from '../common/lang';
 import {QueryParam} from '../common/query-params';
 import {PlateProgress} from './PlateProgress';
@@ -32,6 +32,8 @@ export class RootComponent extends React.PureComponent<{}, State> {
     const queryParams = new URLSearchParams(location.search);
     const friendIdx = queryParams.get(QueryParam.FriendIdx);
     const playerName = queryParams.get(QueryParam.PlayerName);
+    const gameVerParam = queryParams.get(QueryParam.GameVersion);
+    const gameVer = validateGameVersion(gameVerParam, GameVersion.FESTiVAL) - 1;
     const region = getGameRegionFromShortString(queryParams.get(QueryParam.GameRegion));
     const lang = getInitialLanguage();
     updateDocumentTitle(lang);
@@ -39,7 +41,7 @@ export class RootComponent extends React.PureComponent<{}, State> {
     this.state = {
       lang,
       region,
-      version: GameVersion.FESTiVAL_PLUS.toString(),
+      version: gameVer.toString(),
       friendIdx,
       playerName,
       progress: '',
