@@ -1,12 +1,17 @@
 export const enum ChartType {
   STANDARD = 0,
   DX = 1,
+  UTAGE = 2,
 }
 
 export function getChartType(row: HTMLElement): ChartType {
   if (row.id) {
     // for multi-ChartType songs in song list
     return row.id.includes('sta_') ? ChartType.STANDARD : ChartType.DX;
+  }
+  if (row.querySelector('.playlog_music_kind_icon_utage')) {
+    // for play record list
+    return ChartType.UTAGE;
   }
   const chartTypeImg =
     row.querySelector('.playlog_music_kind_icon') || // for single and all play records
@@ -21,5 +26,12 @@ export function getChartType(row: HTMLElement): ChartType {
 }
 
 export function getChartTypeName(ct: ChartType): string {
-  return ct === ChartType.DX ? 'DX' : 'STD';
+  switch (ct) {
+    case ChartType.DX:
+      return 'DX';
+    case ChartType.STANDARD:
+      return 'STD';
+    default:
+      return 'UTAGE';
+  }
 }

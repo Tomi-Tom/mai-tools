@@ -19,7 +19,11 @@ const DIFF_RANK_TOP_LEFT_CELL_CLASSNAME = 'difficultyRankDistHead';
 function getRecordsPerDifficulty(records: ReadonlyArray<ChartRecord>) {
   const recordsPerDifficulty = new Map<Difficulty, Record<ChartType, number>>();
   for (let i = DIFFICULTIES.length - 1; i >= 0; i--) {
-    recordsPerDifficulty.set(DIFFICULTIES[i], {[ChartType.DX]: 0, [ChartType.STANDARD]: 0});
+    recordsPerDifficulty.set(DIFFICULTIES[i], {
+      [ChartType.DX]: 0,
+      [ChartType.STANDARD]: 0,
+      [ChartType.UTAGE]: 0,
+    });
   }
   for (const r of records) {
     recordsPerDifficulty.get(r.difficulty)[r.chartType] += 1;
@@ -40,7 +44,7 @@ export const DifficultyDistribution = ({chartRecords, topChartsCount}: Props) =>
       has[r.chartType] = true;
       return has;
     },
-    {[ChartType.STANDARD]: false, [ChartType.DX]: false}
+    {[ChartType.STANDARD]: false, [ChartType.DX]: false, [ChartType.UTAGE]: false}
   );
   const chartTypeNames = [ChartType.DX, ChartType.STANDARD]
     .filter((chartType) => hasChartType[chartType])

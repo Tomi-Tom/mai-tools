@@ -2,7 +2,7 @@ import './recent-play-downloader.css';
 
 import domtoimage from 'dom-to-image';
 
-import {ChartType} from '../common/chart-type';
+import {ChartType, getChartType} from '../common/chart-type';
 import {fixTimezone, formatDate} from '../common/date-util';
 import {Difficulty, getDifficultyByName, getDifficultyClassName} from '../common/difficulties';
 import {calculateDetailedDxStar, getDxStarText} from '../common/dx-star';
@@ -19,9 +19,10 @@ type ScoreRecord = {
   songImgSrc: string;
   chartType: ChartType;
   difficulty: Difficulty;
+  lv: string;
   achievement: number;
   rank: string;
-  stamps: string;
+  marks: string;
   isNewRecord: boolean;
 };
 type Options = {
@@ -29,7 +30,13 @@ type Options = {
   showAll?: boolean;
   olderFirst?: boolean;
 };
-
+enum Column {
+  DATE,
+  SONG,
+  LV,
+  ACHV,
+  MARKS,
+}
 (function (d) {
   const LANG = getInitialLanguage();
   const UIString = {
@@ -37,8 +44,9 @@ type Options = {
       date: '日期',
       songName: '歌曲',
       difficulty: '難度',
+      level: '等級',
       achievement: '達成率',
-      stamps: '成就',
+      marks: '成就',
       playDate: '遊玩日期：',
       newRecordToggleHeading: '顯示：',
       sortBy: '排序方式：',
@@ -54,8 +62,9 @@ type Options = {
       date: 'Date',
       songName: 'Song',
       difficulty: 'Difficulty',
+      level: 'Lv',
       achievement: 'Achv',
-      stamps: 'Stamps',
+      marks: 'Marks',
       playDate: 'Play date:',
       newRecordToggleHeading: 'Display:',
       sortBy: 'Sort by:',
@@ -71,8 +80,9 @@ type Options = {
       date: '날짜',
       songName: '노래',
       difficulty: '난이도',
+      level: '레벨',
       achievement: '정확도',
-      stamps: '등급',
+      marks: '성취도',
       playDate: '플레이 일:',
       newRecordToggleHeading: '표시:',
       sortBy: '정렬 순서:',
@@ -104,14 +114,84 @@ type Options = {
   const SORT_BY_RADIO_NAME = 'sortByRadio';
   const SCORE_RECORD_ROW_CLASSNAME = 'recordRow';
   const SCORE_RECORD_CELL_BASE_CLASSNAME = 'recordCell';
-  const SCORE_RECORD_CELL_CLASSNAMES = [
-    'dateCell',
-    'songTitleCell',
-    'achievementCell',
-    'stampsCell',
-  ];
+  const SCORE_RECORD_CELL_CLASSNAME_BY_COL: Record<Column, string> = {
+    [Column.DATE]: 'dateCell',
+    [Column.SONG]: 'songTitleCell',
+    [Column.LV]: 'lvCell',
+    [Column.ACHV]: 'achievementCell',
+    [Column.MARKS]: 'marksCell',
+  };
 
   const ce = d.createElement.bind(d);
+
+  const tableHeadCellRenderer: Record<Column, () => HTMLElement> = {
+    [Column.DATE]: () => {
+      const cell = ce('th');
+      cell.append(UIString.date);
+      return cell;
+    },
+    [Column.SONG]: () => {
+      const cell = ce('th');
+      cell.append(UIString.songName);
+      return cell;
+    },
+    [Column.LV]: () => {
+      const cell = ce('th');
+      cell.append(UIString.level);
+      return cell;
+    },
+    [Column.ACHV]: () => {
+      const cell = ce('th');
+      cell.append(UIString.achievement);
+      return cell;
+    },
+    [Column.MARKS]: () => {
+      const cell = ce('th');
+      cell.append(UIString.marks);
+      return cell;
+    },
+  };
+
+  const tableBodyCellRenderer: Record<
+    Column,
+    (record: ScoreRecord, songDb: SongDatabase) => HTMLElement
+  > = {
+    [Column.DATE]: (record) => {
+      const cell = ce('td');
+      cell.append(formatDate(record.date));
+      return cell;
+    },
+    [Column.SONG]: (record, songDb) => {
+      const cell = ce('td');
+      cell.classList.add('songImg');
+      cell.style.backgroundImage = `url("${record.songImgSrc}")`;
+      const genre = isNiconicoLinkImg(record.songImgSrc) ? 'niconico' : '';
+      const nickname = songDb.hasDualCharts(record.songName, genre)
+        ? getSongNicknameWithChartType(record.songName, genre, record.chartType)
+        : record.songName;
+      cell.append(nickname);
+      return cell;
+    },
+    [Column.LV]: (record) => {
+      const cell = ce('td');
+      cell.append(record.lv);
+      return cell;
+    },
+    [Column.ACHV]: (record) => {
+      const cell = ce('td');
+      // Avoid <br> to keep it copyable as TSV.
+      const rankSpan = document.createElement('span');
+      rankSpan.className = 'd_b';
+      rankSpan.append(record.rank);
+      cell.append(rankSpan, '\t', record.achievement.toFixed(4) + '%');
+      return cell;
+    },
+    [Column.MARKS]: (record) => {
+      const cell = ce('td');
+      cell.append(record.marks);
+      return cell;
+    },
+  };
 
   function getPlayDate(row: HTMLElement) {
     const playDateText = (row.querySelector('.sub_title').children[1] as HTMLElement).innerText;
@@ -143,13 +223,6 @@ type Options = {
     return img ? img.src : '';
   }
 
-  function getChartType(row: HTMLElement) {
-    const isDxChart = (
-      row.querySelector('.playlog_music_kind_icon') as HTMLImageElement
-    ).src.endsWith('music_dx.png');
-    return isDxChart ? ChartType.DX : ChartType.STANDARD;
-  }
-
   function getDifficulty(row: HTMLElement) {
     const recordBody = row.children[1];
     const cn = recordBody.className;
@@ -177,9 +250,8 @@ type Options = {
       .toUpperCase();
   }
 
-  function getStamps(row: HTMLElement): string {
+  function getMarks(row: HTMLElement): string {
     const results = [];
-
     // FC/AP
     const stampImgs = row.querySelectorAll(
       '.playlog_result_innerblock > img'
@@ -205,7 +277,7 @@ type Options = {
     if (dxStar) {
       results.push(dxStar);
     }
-    return results.join(' / ');
+    return results.join(' ');
   }
 
   function getIsNewRecord(row: HTMLElement) {
@@ -214,56 +286,34 @@ type Options = {
     );
   }
 
-  function _renderScoreRowHelper(
-    columnValues: ReadonlyArray<string | DocumentFragment | ReadonlyArray<string>>,
-    rowClassnames: ReadonlyArray<string>,
-    isHeading: boolean
-  ) {
+  function renderScoreHeadRow(columns: ReadonlyArray<Column>) {
     const tr = ce('tr');
-    for (const cn of rowClassnames) {
-      tr.classList.add(cn);
-    }
-    columnValues.forEach((v, index) => {
-      const cell = ce(isHeading ? 'th' : 'td');
-      if (typeof v === 'string' || v instanceof DocumentFragment) {
-        cell.append(v);
-      } else {
-        if (v[1]) {
-          cell.classList.add('songImg');
-          cell.style.backgroundImage = `url("${v[1]}")`;
-        }
-        cell.append(v[0]);
-      }
+    tr.classList.add(SCORE_RECORD_ROW_CLASSNAME);
+    columns.forEach((col) => {
+      const cell = tableHeadCellRenderer[col]();
       cell.classList.add(SCORE_RECORD_CELL_BASE_CLASSNAME);
-      cell.classList.add(SCORE_RECORD_CELL_CLASSNAMES[index]);
+      cell.classList.add(SCORE_RECORD_CELL_CLASSNAME_BY_COL[col]);
       tr.append(cell);
     });
     return tr;
   }
 
-  function renderScoreHeadRow() {
-    return _renderScoreRowHelper(
-      [UIString.date, UIString.songName, UIString.achievement, UIString.stamps],
-      [SCORE_RECORD_ROW_CLASSNAME],
-      true
-    );
-  }
-
-  function renderScoreRow(record: ScoreRecord, songDb: SongDatabase) {
-    const genre = isNiconicoLinkImg(record.songImgSrc) ? 'niconico' : '';
-    const nickname = songDb.hasDualCharts(record.songName, genre)
-      ? getSongNicknameWithChartType(record.songName, genre, record.chartType)
-      : record.songName;
-    const achvFragment = document.createDocumentFragment();
-    const rankSpan = document.createElement('span');
-    rankSpan.className = 'd_b';
-    rankSpan.append(record.rank);
-    achvFragment.append(rankSpan, '\t', record.achievement.toFixed(4) + '%');
-    return _renderScoreRowHelper(
-      [formatDate(record.date), [nickname, record.songImgSrc], achvFragment, record.stamps],
-      [SCORE_RECORD_ROW_CLASSNAME, getDifficultyClassName(record.difficulty)],
-      false
-    );
+  function renderScoreRow(
+    columns: ReadonlyArray<Column>,
+    record: ScoreRecord,
+    songDb: SongDatabase
+  ) {
+    const tr = ce('tr');
+    tr.classList.add(SCORE_RECORD_ROW_CLASSNAME);
+    tr.classList.add(getDifficultyClassName(record.difficulty));
+    columns.forEach((col) => {
+      const cell = tableBodyCellRenderer[col](record, songDb);
+      cell.classList.add(SCORE_RECORD_CELL_BASE_CLASSNAME);
+      const colClassName = SCORE_RECORD_CELL_CLASSNAME_BY_COL[col];
+      cell.classList.add(colClassName);
+      tr.append(cell);
+    });
+    return tr;
   }
 
   function renderTopScores(
@@ -273,11 +323,12 @@ type Options = {
     thead: HTMLTableSectionElement,
     tbody: HTMLTableSectionElement
   ) {
+    const columns = [Column.DATE, Column.SONG, Column.LV, Column.ACHV, Column.MARKS];
     thead.innerHTML = '';
     tbody.innerHTML = '';
-    thead.append(renderScoreHeadRow());
+    thead.append(renderScoreHeadRow(columns));
     records.forEach((r) => {
-      tbody.append(renderScoreRow(r, songDb));
+      tbody.append(renderScoreRow(columns, r, songDb));
     });
     container.style.paddingBottom = Math.floor(records.length / 2) + 2 + 'px';
   }
@@ -535,7 +586,11 @@ type Options = {
     insertBefore.insertAdjacentElement('beforebegin', dv);
   }
 
-  async function addLvToRow(row: HTMLElement, record: ScoreRecord, songDb: SongDatabase) {
+  function addLvToRow(
+    row: HTMLElement,
+    record: Pick<ScoreRecord, 'songName' | 'songImgSrc' | 'chartType' | 'difficulty'>,
+    songDb: SongDatabase
+  ): string {
     const genre =
       record.songName === 'Link' && isNiconicoLinkImg(record.songImgSrc) ? 'niconico' : '';
     const props = songDb.getSongProperties(record.songName, genre, record.chartType);
@@ -543,6 +598,7 @@ type Options = {
     if (lv) {
       addLvToSongTitle(row, record.difficulty, lv);
     }
+    return lv;
   }
 
   const titleImg = d.querySelector('.main_wrapper > img.title') as HTMLImageElement;
@@ -553,27 +609,29 @@ type Options = {
         d.querySelectorAll('.main_wrapper .p_10.t_l.f_0.v_b')
       ) as HTMLElement[];
       try {
-        const records = rows.map((row) => ({
-          date: getPlayDate(row),
-          songName: getSongName(row),
-          songImgSrc: getSongImgSrc(row),
-          chartType: getChartType(row),
-          difficulty: getDifficulty(row),
-          achievement: getAchievement(row),
-          rank: getRank(row),
-          stamps: getStamps(row),
-          isNewRecord: getIsNewRecord(row),
-        }));
         const gameVer = await fetchGameVersion(d.body);
         const gameRegion = getGameRegionFromOrigin(d.location.origin);
         const songDb = await loadSongDatabase(gameVer, gameRegion);
-        createOutputElement(records, songDb, titleImg);
-        rows.forEach((row, idx) => {
-          const record = records[idx];
-          if (record.difficulty !== Difficulty.UTAGE) {
-            addLvToRow(row, record, songDb);
-          }
+        const records: ScoreRecord[] = rows.map((row) => {
+          const baseRecord = {
+            songName: getSongName(row),
+            songImgSrc: getSongImgSrc(row),
+            chartType: getChartType(row),
+            difficulty: getDifficulty(row),
+          };
+          const lv =
+            baseRecord.difficulty !== Difficulty.UTAGE ? addLvToRow(row, baseRecord, songDb) : '';
+          return {
+            ...baseRecord,
+            lv,
+            date: getPlayDate(row),
+            achievement: getAchievement(row),
+            rank: getRank(row),
+            marks: getMarks(row),
+            isNewRecord: getIsNewRecord(row),
+          };
         });
+        createOutputElement(records, songDb, titleImg);
       } catch (e) {
         const footer = d.getElementsByTagName('footer')[0];
         const textarea = ce('textarea');

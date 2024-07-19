@@ -9,7 +9,7 @@
 }
 
 .playRecordTable {
-  font-size: 14px;
+  font-size: 12px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -23,20 +23,24 @@ tbody tr.recordRow {
   user-select: all;
 }
 
-td.recordCell {
-  font-size: 12px;
+th.recordCell {
+  font-size: 14px;
 }
 
 .recordCell.dateCell {
   width: 78px;
 }
 
+.recordCell.lvCell {
+  width: 45px;
+}
+
 .recordCell.achievementCell {
   width: 75px;
 }
 
-.recordCell.stampsCell {
-  width: 70px;
+.recordCell.marksCell {
+  width: 65px;
 }
 
 td.songTitleCell {
