@@ -54,7 +54,14 @@ export const ChartRecordDataRow = React.memo((props: Props) => {
         case ColumnType.LEVEL:
           return getDisplayLv(record.level, !record.levelIsPrecise);
         case ColumnType.ACHIEVEMENT:
-          return record.achievement.toFixed(4) + '%';
+          return isCandidate && record.rating ? (
+            <>
+              <div className="textAlignRight">{record.achievement.toFixed(4) + '%'}</div>
+              <div className="textAlignCenter">{Math.floor(record.rating)}</div>
+            </>
+          ) : (
+            record.achievement.toFixed(4) + '%'
+          );
         case ColumnType.RANK:
           return getRankTitle(record.achievement);
         case ColumnType.NEXT_RANK:

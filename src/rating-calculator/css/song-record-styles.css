@@ -94,9 +94,14 @@ td.nextRatingCell {
 td.chartTypeCell,
 td.levelCell,
 td.ratingCell,
+.textAlignCenter,
 .rankCell,
 .candidateTable .ratingCell {
   text-align: center;
+}
+
+.textAlignRight {
+  text-align: right;
 }
 
 .songWikiLink {
