@@ -21,7 +21,7 @@ export function getRemovedSongs(gameRegion: GameRegion, gameVersion: GameVersion
     }
     return ['全世界共通リズム感テスト'];
   } else if (gameRegion === GameRegion.Intl) {
-    return [
+    let songList = [
       // Removed in UNiVERSE
       'コネクト',
       'シュガーソングとビターステップ',
@@ -33,6 +33,16 @@ export function getRemovedSongs(gameRegion: GameRegion, gameVersion: GameVersion
       'アウトサイダー',
       'ジャガーノート',
     ];
+    if (gameVersion > GameVersion.BUDDiES) {
+      songList = songList.concat([
+        '泥の分際で私だけの大切を奪おうだなんて',
+        'テリトリーバトル',
+        'くらべられっ子',
+        'あの世行きのバスに乗ってさらば。',
+        'アンダーキッズ',
+      ]);
+    }
+    return songList;
   }
   return [];
 }
