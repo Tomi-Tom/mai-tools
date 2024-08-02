@@ -7,12 +7,15 @@ import {CommonMessages} from '../common-messages';
 const MessagesByLang = {
   [Language.en_US]: {
     internalLvHeading: 'Chart Internal Level Data',
+    manualInput: 'Manual input',
   },
   [Language.zh_TW]: {
     internalLvHeading: '譜面定數',
+    manualInput: '手動輸入',
   },
   [Language.ko_KR]: {
     internalLvHeading: '채보 상수 데이터',
+    manualInput: '직접입력',
   },
 };
 
@@ -50,7 +53,7 @@ export const InternalLvInput = () => {
             checked={showTextarea}
             onChange={handleRadioChange}
           />
-          {commonMessages.manualInput}
+          {messages.manualInput}
         </label>
       </form>
       {showTextarea && <textarea className="lvInput" />}

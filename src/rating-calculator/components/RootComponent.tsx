@@ -87,8 +87,7 @@ export class RootComponent extends React.PureComponent<{}, State> {
     }
     loadSongDatabase(gameVer, region).then((songDb) => {
       this.songDatabase = songDb;
-      this.playerScores = readPlayerScoresFromQueryParams(queryParams, songDb);
-      this.analyzeRating();
+      this.setPlayerScores(readPlayerScoresFromQueryParams(queryParams, songDb));
     });
     this.initWindowCommunication();
   }
@@ -111,7 +110,7 @@ export class RootComponent extends React.PureComponent<{}, State> {
             <VersionSelect gameVer={gameVer} handleVersionSelect={this.selectVersion} />
           </tbody>
         </table>
-        <ScoreInput />
+        <ScoreInput setPlayerScores={this.setPlayerScores} />
         <div className="actionArea">
           <button className="analyzeRatingBtn" onClick={this.analyzeRating}>
             {messages.computeRating}
@@ -149,6 +148,11 @@ export class RootComponent extends React.PureComponent<{}, State> {
     this.setState({region}, this.analyzeRating);
   };
 
+  private setPlayerScores = (records: ChartRecord[]) => {
+    this.playerScores = records;
+    this.analyzeRating();
+  };
+
   private analyzeRating = async (evt?: React.SyntheticEvent) => {
     if (evt) {
       evt.preventDefault();
@@ -163,10 +167,8 @@ export class RootComponent extends React.PureComponent<{}, State> {
     }
     // TODO: support overrides by user
     console.log('Song database:', this.songDatabase);
-    const playerScoresFromInput = readPlayerScoresFromManualInput();
-    const playerScores = playerScoresFromInput.length ? playerScoresFromInput : this.playerScores;
-    console.log('Player scores:', playerScores);
-    if (!playerScores.length) {
+    console.log('Player scores:', this.playerScores);
+    if (!this.playerScores.length) {
       this.setState({ratingData: undefined});
       return;
     }
@@ -174,7 +176,7 @@ export class RootComponent extends React.PureComponent<{}, State> {
       this.songDatabase,
       this.date,
       playerName,
-      playerScores,
+      this.playerScores,
       gameVer,
       region
     );
@@ -237,8 +239,7 @@ export class RootComponent extends React.PureComponent<{}, State> {
           this.setState({progress: evt.data.payload});
           break;
         case 'setPlayerScore':
-          this.playerScores = evt.data.payload;
-          this.analyzeRating();
+          this.setPlayerScores(evt.data.payload);
           break;
         case 'allSongs':
           this.setState({allSongs: evt.data.payload});
@@ -265,12 +266,6 @@ function updateDocumentTitle(lang: Language) {
       document.title = 'maimai DX R 值分析工具';
       break;
   }
-}
-
-function readPlayerScoresFromManualInput(): ChartRecord[] {
-  const textarea = document.getElementById('playerScoresTextarea');
-  const rawText = textarea instanceof HTMLTextAreaElement ? textarea.value : '';
-  return rawText ? JSON.parse(rawText) : [];
 }
 
 function readPlayerScoresFromQueryParams(qp: URLSearchParams, songDb: SongDatabase): ChartRecord[] {

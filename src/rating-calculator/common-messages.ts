@@ -13,7 +13,6 @@ export const CommonMessages = {
     achievementAbbr: 'Achv',
     showMore: 'Show more',
     showLess: 'Show less',
-    manualInput: 'Manual input',
     autofill: 'Autofill',
   },
   [Language.zh_TW]: {
@@ -28,7 +27,6 @@ export const CommonMessages = {
     achievementAbbr: '達成率',
     showMore: '顯示更多',
     showLess: '顯示較少',
-    manualInput: '手動輸入',
     autofill: '自動帶入',
   },
   [Language.ko_KR]: {
@@ -43,7 +41,6 @@ export const CommonMessages = {
     achievementAbbr: '정확도',
     showMore: '자세히 보기',
     showLess: '간략히',
-    manualInput: '직접입력',
     autofill: '자동입력',
   },
 };

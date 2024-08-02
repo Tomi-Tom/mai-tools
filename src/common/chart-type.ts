@@ -36,7 +36,7 @@ export function getChartTypeName(ct: ChartType): string {
   }
 }
 
-export function getChartTypeNameForDXRatingNet(ct: ChartType): string {
+export function getChartTypeNameForDxRatingNet(ct: ChartType): string {
   switch (ct) {
     case ChartType.DX:
       return 'dx';
