@@ -21,6 +21,25 @@ export function getDifficultyName(diff: Difficulty): string {
   return DIFFICULTY_TEXT[diff];
 }
 
+export function getDifficultyNameForDxRatingNet(d: Difficulty): string {
+  switch (d) {
+    case Difficulty.BASIC:
+      return 'basic';
+    case Difficulty.ADVANCED:
+      return 'advanced';
+    case Difficulty.EXPERT:
+      return 'expert';
+    case Difficulty.MASTER:
+      return 'master';
+    case Difficulty.ReMASTER:
+      return 'remaster';
+    case Difficulty.UTAGE:
+      return 'utage';
+    default:
+      return 'unknown';
+  }
+}
+
 export function getDifficultyShortName(diff: Difficulty): string {
   return DIFFICULTY_SHORT_TEXT[diff];
 }

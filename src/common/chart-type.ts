@@ -35,3 +35,14 @@ export function getChartTypeName(ct: ChartType): string {
       return 'UTAGE';
   }
 }
+
+export function getChartTypeNameForDXRatingNet(ct: ChartType): string {
+  switch (ct) {
+    case ChartType.DX:
+      return 'dx';
+    case ChartType.STANDARD:
+      return 'std';
+    default:
+      return 'utage';
+  }
+}
