@@ -8,6 +8,7 @@ import {useLanguage} from '../../common/lang-react';
 const MessagesByLang = {
   [Language.en_US]: {
     otherToolsHeading: 'Other Tools',
+    dxRatingNet: 'DXRating.net',
     ratingVisualizer: 'Rating Lookup Table & Visualization',
     bookmarketList: 'mai-tools homepage (Features & How to use)',
     arcadeSongs: 'arcade-songs (Song searching tool) by Raku Zeta',
@@ -17,6 +18,7 @@ const MessagesByLang = {
   },
   [Language.zh_TW]: {
     otherToolsHeading: '其他工具',
+    dxRatingNet: 'DXRating.net',
     ratingVisualizer: '單曲 R 值圖表',
     bookmarketList: 'maimai 小工具介紹與設定教學',
     arcadeSongs: '音樂遊戲歌曲搜尋工具 arcade-songs (由 Raku Zeta 製作)',
@@ -25,6 +27,7 @@ const MessagesByLang = {
   },
   [Language.ko_KR]: {
     otherToolsHeading: '다른 도구',
+    dxRatingNet: 'DXRating.net',
     ratingVisualizer: '레이팅 상수 표 & 시각화',
     bookmarketList: 'maimai 북마크 (기능 & 사용법)',
     arcadeSongs: 'arcade-songs (노래 검색기) by Raku Zeta',
@@ -46,6 +49,11 @@ export const OtherTools = ({gameVer}: Props) => {
       <hr className="sectionSep" />
       <h2 className="otherToolsHeading">{messages.otherToolsHeading}</h2>
       <ul>
+        <li className="toolItem">
+          <a href="https://dxrating.net/rating" target="_blank">
+            {messages.dxRatingNet}
+          </a>
+        </li>
         <li className="toolItem">
           <a href={visualizerLink} target="_blank">
             {messages.ratingVisualizer}
