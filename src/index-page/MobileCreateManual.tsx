@@ -70,12 +70,7 @@ export const MobileCreateManual = () => {
         <p>{messages.desc}</p>
         <ol>
           <li>
-            <a
-              href="javascript:void(0)"
-              onClick={copyLink}
-              onTouchStart={setPageTitle}
-              onContextMenu={setPageTitle}
-            >
+            <a href="#" onClick={copyLink} onTouchStart={setPageTitle} onContextMenu={setPageTitle}>
               {messages.chrome1}
             </a>
             <input className="bookmarkletScript" ref={inputRef} value={BOOKMARKLET_LINK} readOnly />

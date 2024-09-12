@@ -119,17 +119,29 @@ export function ShareRating(props: {
     setEncodedAchievements(topRecords.map((res) => res.achievement).join('_'));
   }, [ratingData, songDb]);
 
-  const downloadAllPlayerScores = useCallback(() => {
-    downloadPlayerScores(ratingData);
-  }, [ratingData]);
+  const downloadAllPlayerScores = useCallback(
+    (evt: React.SyntheticEvent) => {
+      evt.preventDefault();
+      downloadPlayerScores(ratingData);
+    },
+    [ratingData]
+  );
 
-  const downloadTopAsDxRatingNetJson = useCallback(() => {
-    downloadAsDxRatingNetJson(ratingData, true);
-  }, [ratingData]);
+  const downloadTopAsDxRatingNetJson = useCallback(
+    (evt: React.SyntheticEvent) => {
+      evt.preventDefault();
+      downloadAsDxRatingNetJson(ratingData, true);
+    },
+    [ratingData]
+  );
 
-  const downloadAllAsDxRatingNetJson = useCallback(() => {
-    downloadAsDxRatingNetJson(ratingData, false);
-  }, [ratingData]);
+  const downloadAllAsDxRatingNetJson = useCallback(
+    (evt: React.SyntheticEvent) => {
+      evt.preventDefault();
+      downloadAsDxRatingNetJson(ratingData, false);
+    },
+    [ratingData]
+  );
 
   const messages = MessagesByLang[useLanguage()];
 
@@ -161,17 +173,17 @@ export function ShareRating(props: {
         </p>
       ) : null}
       <p className="shareLinkItem">
-        <a href="javascript:void(0)" onClick={downloadAllPlayerScores}>
+        <a href="#" onClick={downloadAllPlayerScores}>
           {messages.exportAsJson}
         </a>
       </p>
       <p className="shareLinkItem">
-        <a href="javascript:void(0)" onClick={downloadTopAsDxRatingNetJson}>
+        <a href="#" onClick={downloadTopAsDxRatingNetJson}>
           {messages.exportTopForDxRatingNet}
         </a>
       </p>
       <p className="shareLinkItem">
-        <a href="javascript:void(0)" onClick={downloadAllAsDxRatingNetJson}>
+        <a href="#" onClick={downloadAllAsDxRatingNetJson}>
           {messages.exportAllForDxRatingNet}
         </a>
       </p>
