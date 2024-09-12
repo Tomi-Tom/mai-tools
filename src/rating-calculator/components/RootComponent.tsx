@@ -57,11 +57,14 @@ export class RootComponent extends React.PureComponent<{}, State> {
   private playerScores: ChartRecord[] = [];
   private songDatabase: SongDatabase;
 
+  // Current GameVersion (provided by the query parameter)
+  private currentGameVer: GameVersion;
+
   constructor(props: {}) {
     super(props);
     const queryParams = new URLSearchParams(location.search);
     const gameVerParam = queryParams.get(QueryParam.GameVersion);
-    const gameVer = validateGameVersion(
+    this.currentGameVer = validateGameVersion(
       gameVerParam,
       RATING_CALCULATOR_SUPPORTED_VERSIONS[0],
       RATING_CALCULATOR_SUPPORTED_VERSIONS[RATING_CALCULATOR_SUPPORTED_VERSIONS.length - 1]
@@ -77,7 +80,7 @@ export class RootComponent extends React.PureComponent<{}, State> {
     this.state = {
       lang,
       region,
-      gameVer,
+      gameVer: this.currentGameVer,
       friendIdx,
       playerName,
       progress: '',
@@ -85,7 +88,7 @@ export class RootComponent extends React.PureComponent<{}, State> {
     if (!isNaN(date)) {
       this.date = new Date(date);
     }
-    loadSongDatabase(gameVer, region).then((songDb) => {
+    loadSongDatabase(this.currentGameVer, region).then((songDb) => {
       this.songDatabase = songDb;
       this.setPlayerScores(readPlayerScoresFromQueryParams(queryParams, songDb));
     });
@@ -177,8 +180,9 @@ export class RootComponent extends React.PureComponent<{}, State> {
       this.date,
       playerName,
       this.playerScores,
+      region,
       gameVer,
-      region
+      gameVer < this.currentGameVer
     );
     console.log('Rating Data:', ratingData);
     this.setState({ratingData}, () =>

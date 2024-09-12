@@ -32,13 +32,18 @@ function getRecordWithRating(
   };
 }
 
+/**
+ * @param excludeSongsWithNoProps Set this to true when you want to calculate rating for past
+ *    versions but don't want to include new songs.
+ */
 export function analyzePlayerRating(
   songDb: SongDatabase,
   date: Date,
   playerName: string,
   playerScores: ReadonlyArray<ChartRecord>,
+  gameRegion: GameRegion,
   gameVer: GameVersion,
-  gameRegion: GameRegion
+  excludeSongsWithNoProps: boolean
 ): RatingData {
   const newChartRecords = [];
   const oldChartRecords = [];
@@ -48,6 +53,9 @@ export function analyzePlayerRating(
       continue;
     }
     const songProps = songDb.getSongProperties(record.songName, record.genre, record.chartType);
+    if (excludeSongsWithNoProps && !songProps) {
+      continue;
+    }
     const isNewChart = songProps ? songProps.debut === gameVer : record.chartType === ChartType.DX;
     const recordWithRating = getRecordWithRating(record, songProps);
     if (isNewChart) {
