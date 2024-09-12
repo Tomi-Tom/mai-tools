@@ -30,6 +30,7 @@ const VERSION_NAMES = [
   'FESTiVAL PLUS',
   'BUDDiES', // 21
   'BUDDiES PLUS',
+  'PRiSM (experimental)', // 23
 ];
 
 export const enum GameVersion {
@@ -40,9 +41,10 @@ export const enum GameVersion {
   FESTiVAL_PLUS = 20,
   BUDDiES = 21,
   BUDDiES_PLUS = 22,
+  PRiSM = 23,
 }
 
-export const LATEST_VERSION = GameVersion.BUDDiES_PLUS;
+export const LATEST_VERSION = GameVersion.PRiSM;
 
 export const RATING_CALCULATOR_SUPPORTED_VERSIONS = [
   GameVersion.UNIVERSE_PLUS,
@@ -50,6 +52,7 @@ export const RATING_CALCULATOR_SUPPORTED_VERSIONS = [
   GameVersion.FESTiVAL_PLUS,
   GameVersion.BUDDiES,
   GameVersion.BUDDiES_PLUS,
+  GameVersion.PRiSM,
 ];
 
 export function validateGameVersion(

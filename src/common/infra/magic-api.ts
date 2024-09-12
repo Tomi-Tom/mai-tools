@@ -28,8 +28,11 @@ const MagicSauce: Record<GameVersion, string> = {
   [GameVersion.BUDDiES]:
     'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZThkOGJiMjcyZjMyYzJjOGE2ODU0MTQzZGUxY2FhZDEvcmF3Lw==',
   [GameVersion.BUDDiES_PLUS]:
-    'aHR0cHM6Ly9zZ2ltZXJhLmdpdGh1Yi5pby9tYWlfUmF0aW5nQW5hbHl6ZXIvc2NyaXB0c19tYWltYWkvbWFpZHhfaW5fbHZfYnVkZGllc3BsdXMuanM=',
+    'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZjA1OTMzMWViOWRhZWZlYjBkYzU3Y2UxNWU2ZjczZTkvcmF3Lw==',
+  [GameVersion.PRiSM]: null,
 };
+
+const FALLBACK_VERSION = GameVersion.BUDDiES_PLUS;
 
 // If the value is true, we assume it is SongProperties[] stored as JSON.
 const MagicIsParsed: Record<GameVersion, boolean> = {
@@ -39,7 +42,8 @@ const MagicIsParsed: Record<GameVersion, boolean> = {
   [GameVersion.FESTiVAL]: false,
   [GameVersion.FESTiVAL_PLUS]: false,
   [GameVersion.BUDDiES]: true,
-  [GameVersion.BUDDiES_PLUS]: false,
+  [GameVersion.BUDDiES_PLUS]: true,
+  [GameVersion.PRiSM]: false,
 };
 
 const DX_REGEX = /\bdx\s*:\s*([0-9]+)/;
@@ -87,7 +91,10 @@ export class MagicApi {
   }
 
   private async fetchMagic(gameVer: GameVersion): Promise<SongProperties[]> {
-    const sauce = MagicSauce[gameVer] || MagicSauce[GameVersion.UNIVERSE_PLUS];
+    const sauce = MagicSauce[gameVer];
+    if (!sauce) {
+      return this.fetchMagic(FALLBACK_VERSION);
+    }
     const res = await fetch(atob(sauce));
     if (!res.ok) {
       const error = new Error(`Failed to load magic ${gameVer}`);
