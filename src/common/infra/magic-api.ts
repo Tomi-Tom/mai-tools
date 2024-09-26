@@ -29,7 +29,8 @@ const MagicSauce: Record<GameVersion, string> = {
     'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZThkOGJiMjcyZjMyYzJjOGE2ODU0MTQzZGUxY2FhZDEvcmF3Lw==',
   [GameVersion.BUDDiES_PLUS]:
     'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZjA1OTMzMWViOWRhZWZlYjBkYzU3Y2UxNWU2ZjczZTkvcmF3Lw==',
-  [GameVersion.PRiSM]: null,
+  [GameVersion.PRiSM]:
+    'aHR0cHM6Ly9zZ2ltZXJhLmdpdGh1Yi5pby9tYWlfUmF0aW5nQW5hbHl6ZXIvc2NyaXB0c19tYWltYWkvbWFpZHhfaW5fbHZfcHJpc21fLmpz',
 };
 
 const FALLBACK_VERSION = GameVersion.BUDDiES_PLUS;
