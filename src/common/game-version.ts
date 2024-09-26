@@ -30,7 +30,7 @@ const VERSION_NAMES = [
   'FESTiVAL PLUS',
   'BUDDiES', // 21
   'BUDDiES PLUS',
-  'PRiSM (experimental)', // 23
+  'PRiSM (beta)', // 23
 ];
 
 export const enum GameVersion {
