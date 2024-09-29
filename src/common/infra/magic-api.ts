@@ -1,6 +1,6 @@
 import {addToCache, cached, expireCache} from '../cache';
 import {ChartType} from '../chart-type';
-import {GameVersion} from '../game-version';
+import {GameVersion, RATING_CALCULATOR_SUPPORTED_VERSIONS} from '../game-version';
 import {getSongNickname, normalizeSongName} from '../song-name-helper';
 import {SongProperties} from '../song-props';
 
@@ -164,4 +164,12 @@ export class MagicApi {
     OLD_KEYS_TO_CLEANUP.map(expireCache);
     return songs;
   }
+}
+
+export function clearMagicCache() {
+  RATING_CALCULATOR_SUPPORTED_VERSIONS.forEach((ver) => {
+    const localStorageKey = `${CACHE_KEY_PREFIX}${ver}`;
+    console.log(`Removing ${localStorageKey} from cache`);
+    expireCache(localStorageKey);
+  });
 }

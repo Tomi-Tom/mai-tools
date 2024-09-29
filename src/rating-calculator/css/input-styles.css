@@ -52,7 +52,8 @@ textarea:focus {
   padding-top: 22px;
 }
 
-.selectFileBtn {
+.selectFileBtn,
+.clearCacheBtn {
   font-size: 18px;
   padding: 4px 12px;
   margin: 8px 0 0 0;

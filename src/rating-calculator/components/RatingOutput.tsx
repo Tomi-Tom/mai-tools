@@ -102,6 +102,7 @@ export const RatingOutput = ({
 
   return (
     <div id="ratingOutput">
+      <hr className="sectionSep" />
       <div>
         <label>
           <input type="checkbox" checked={compactMode} onChange={toggleCompactMode} />{' '}
@@ -156,7 +157,6 @@ export const RatingOutput = ({
           />
         </div>
       )}
-      <hr className="sectionSep" />
     </div>
   );
 };

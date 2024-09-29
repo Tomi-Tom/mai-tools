@@ -19,6 +19,7 @@ import {QueryParam} from '../../common/query-params';
 import {BasicSongProps, loadSongDatabase, SongDatabase} from '../../common/song-props';
 import {analyzePlayerRating} from '../rating-analyzer';
 import {RatingData} from '../types';
+import {DebugActions} from './DebugActions';
 import {LanguageChooser} from './LanguageChooser';
 import {OtherTools} from './OtherTools';
 import {PageFooter} from './PageFooter';
@@ -120,7 +121,6 @@ export class RootComponent extends React.PureComponent<{}, State> {
           </button>
         </div>
         {progress ? <p>{progress}</p> : null}
-        <hr className="sectionSep" />
         {ratingData && (
           <RatingOutput
             gameRegion={region}
@@ -131,6 +131,9 @@ export class RootComponent extends React.PureComponent<{}, State> {
             allSongs={allSongs}
           />
         )}
+        <hr className="sectionSep" />
+        <DebugActions />
+        <hr className="sectionSep" />
         <PageFooter />
         <OtherTools gameVer={gameVer} />
       </LangContext.Provider>
