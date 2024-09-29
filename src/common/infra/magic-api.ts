@@ -1,7 +1,7 @@
 import {addToCache, cached, expireCache} from '../cache';
-import {DIFFICULTIES} from '../difficulties';
+import {ChartType} from '../chart-type';
 import {GameVersion} from '../game-version';
-import {normalizeSongName} from '../song-name-helper';
+import {getSongNickname, normalizeSongName} from '../song-name-helper';
 import {SongProperties} from '../song-props';
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 1 day
@@ -20,17 +20,16 @@ const MagicSauce: Record<GameVersion, string> = {
   [GameVersion.FiNALE]: null,
   [GameVersion.DX]: null,
   [GameVersion.UNIVERSE_PLUS]:
-    'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZWU1NjlkNzRmNDIyZDRlMjU1MDY1ZDhiMDJlYTI5NGEvcmF3Lw==',
+    'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZWU1NjlkNzRmNDIyZDRlMjU1MDY1ZDhiMDJlYTI5NGEvcmF3L21haWR4X2x2X3VuaXZlcnNlcGx1cy5qc29u',
   [GameVersion.FESTiVAL]:
-    'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vMDg1NWM4OTQ3YjU0N2Q3YjliODg4MTU4NTEyZGRlNjkvcmF3Lw==',
+    'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vMDg1NWM4OTQ3YjU0N2Q3YjliODg4MTU4NTEyZGRlNjkvcmF3L21haWR4X2x2X2Zlc3RpdmFsLmpzb24=',
   [GameVersion.FESTiVAL_PLUS]:
-    'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vYWQyNjg1ODcyZmQ3ZjVjZDdhNDdlY2IzNDA1MTRlNmIvcmF3Lw==',
+    'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vYWQyNjg1ODcyZmQ3ZjVjZDdhNDdlY2IzNDA1MTRlNmIvcmF3L21haWR4X2x2X2Zlc3RpdmFscGx1cy5qc29u',
   [GameVersion.BUDDiES]:
     'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZThkOGJiMjcyZjMyYzJjOGE2ODU0MTQzZGUxY2FhZDEvcmF3Lw==',
   [GameVersion.BUDDiES_PLUS]:
     'aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9teWppYW4vZjA1OTMzMWViOWRhZWZlYjBkYzU3Y2UxNWU2ZjczZTkvcmF3Lw==',
-  [GameVersion.PRiSM]:
-    'aHR0cHM6Ly9zZ2ltZXJhLmdpdGh1Yi5pby9tYWlfUmF0aW5nQW5hbHl6ZXIvc2NyaXB0c19tYWltYWkvbWFpZHhfaW5fbHZfcHJpc21fLmpz',
+  [GameVersion.PRiSM]: 'aHR0cHM6Ly9kcDRwNngweGZpNW85LmNsb3VkZnJvbnQubmV0L21haW1haS9kYXRhLmpzb24=',
 };
 
 const FALLBACK_VERSION = GameVersion.BUDDiES_PLUS;
@@ -39,56 +38,85 @@ const FALLBACK_VERSION = GameVersion.BUDDiES_PLUS;
 const MagicIsParsed: Record<GameVersion, boolean> = {
   [GameVersion.FiNALE]: false,
   [GameVersion.DX]: false,
-  [GameVersion.UNIVERSE_PLUS]: false,
-  [GameVersion.FESTiVAL]: false,
-  [GameVersion.FESTiVAL_PLUS]: false,
+  [GameVersion.UNIVERSE_PLUS]: true,
+  [GameVersion.FESTiVAL]: true,
+  [GameVersion.FESTiVAL_PLUS]: true,
   [GameVersion.BUDDiES]: true,
   [GameVersion.BUDDiES_PLUS]: true,
   [GameVersion.PRiSM]: false,
 };
 
-const DX_REGEX = /\bdx\s*:\s*([0-9]+)/;
-const LV_REGEX = /\blv\s*:\s*(\[.+?\])/;
-const VERSION_REGEX = /\bv\s*:\s*(-?[0-9]+)/;
-const SONGNAME_REGEX = /\bn\s*:\s*["'`](.+?)["'`]\s*[,\}]/;
-const SONGNICKNAME_REGEX = /\bnn\s*:\s*["'`](.+?)["'`]\s*[,\}]/;
-const ICO_REGEX = /\bico\s*:\s*["`]([0-9a-z]+)["`]/;
+interface ArcadeSongResponse {
+  songs: ArcadeSong[];
+  versions: ArcadeSongVersion[];
+}
+
+interface ArcadeSongVersion {
+  version: string;
+  abbr: string;
+}
+
+interface ArcadeSong {
+  songId: string;
+  category: string;
+  title: string;
+  version: string;
+  sheets: ArcadeSongSheet[];
+}
+
+interface ArcadeSongSheet {
+  type: 'std' | 'dx' | 'utage';
+  difficulty: 'basic' | 'advanced' | 'expert' | 'master' | 'remaster';
+  levelValue: number;
+  internalLevel: string | null;
+  internalLevelValue: number;
+}
 
 export class MagicApi {
+  private ALLOWED_CHART_TYPES = ['std', 'dx'];
+
   /**
-   * Parse song properties from text.
-   *
-   * Example text format:
-   * {dx:0, v: 2, lv:[4.0, 6.0, 8.8, 10.9, 12.3], n:"Bad Apple!! feat nomico", nn:"Bad Apple!!"},
-   * {dx:1, v:13, lv:[3.0, 7.0, 9.2, 11.8, 0], n:"METEOR"},
+   * Parse song properties from an ArcadeSong object.
    */
-  private parseLine(line: string): SongProperties | undefined {
-    const dxMatch = line.match(DX_REGEX);
-    const lvMatch = line.match(LV_REGEX);
-    const debutVerMatch = line.match(VERSION_REGEX);
-    const songNameMatch = line.match(SONGNAME_REGEX);
-    const nicknameMatch = line.match(SONGNICKNAME_REGEX);
-    const icoMatch = line.match(ICO_REGEX);
-    if (dxMatch && lvMatch && debutVerMatch && songNameMatch) {
-      let lvList = JSON.parse(lvMatch[1]) as number[];
-      if (lvList.length > DIFFICULTIES.length) {
-        const newReMasterLv = lvList.pop()!;
-        lvList[DIFFICULTIES.length - 1] = newReMasterLv;
+  private parseSong(song: ArcadeSong, versions: string[]): SongProperties[] {
+    const debutVer = versions.indexOf(song.version);
+    if (debutVer < 0) {
+      console.warn(`Cannot find debut version for ${song.title}.`, song);
+      return [];
+    }
+    const propsList: SongProperties[] = [];
+    this.ALLOWED_CHART_TYPES.forEach((chartType) => {
+      const sheetList = song.sheets.filter((s) => s.type == chartType);
+      if (sheetList.length === 0) {
+        return;
+      }
+      if (sheetList.length < 4) {
+        console.warn(`Sheet data for ${song.title} (${chartType}) is incomplete.`, sheetList);
+        return;
+      } else {
+        console.assert(
+          sheetList[0].difficulty === 'basic' &&
+            sheetList[1].difficulty === 'advanced' &&
+            sheetList[2].difficulty === 'expert' &&
+            sheetList[3].difficulty === 'master',
+          `Sheets are not ordered by difficulty`
+        );
       }
       const props: SongProperties = {
-        dx: parseInt(dxMatch[1]) as 0 | 1,
-        lv: lvList,
-        debut: Math.abs(parseInt(debutVerMatch[1])),
-        name: normalizeSongName(songNameMatch[1]),
+        name: normalizeSongName(song.title),
+        dx: chartType === 'dx' ? ChartType.DX : ChartType.STANDARD,
+        debut: debutVer,
+        lv: sheetList.map((sheet) =>
+          sheet.internalLevel ? sheet.internalLevelValue : -sheet.levelValue
+        ),
       };
-      if (nicknameMatch) {
-        props.nickname = nicknameMatch[1];
+      const nickname = getSongNickname(song.title, song.category);
+      if (nickname !== song.title) {
+        props.nickname = nickname;
       }
-      if (icoMatch) {
-        props.ico = icoMatch[1];
-      }
-      return props;
-    }
+      propsList.push(props);
+    });
+    return propsList;
   }
 
   private async fetchMagic(gameVer: GameVersion): Promise<SongProperties[]> {
@@ -105,11 +133,13 @@ export class MagicApi {
     if (MagicIsParsed[gameVer]) {
       return await res.json();
     }
-    const text = await res.text();
-    return text
-      .split('\n')
-      .map(this.parseLine)
-      .filter((props) => props != null);
+    const response: ArcadeSongResponse = await res.json();
+    const versions = response.versions.map((v) => v.version);
+    const songs: SongProperties[] = response.songs.reduce(
+      (songs, song) => songs.concat(this.parseSong(song, versions)),
+      []
+    );
+    return songs;
   }
 
   async loadMagic(gameVer: GameVersion): Promise<SongProperties[]> {
