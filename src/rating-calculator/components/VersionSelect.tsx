@@ -11,12 +11,15 @@ import {useLanguage} from '../../common/lang-react';
 const MessagesByLang = {
   [Language.en_US]: {
     gameVer: 'Game version:',
+    dataSource: 'Chart data source:',
   },
   [Language.zh_TW]: {
     gameVer: '遊戲版本：',
+    dataSource: '譜面定數來源：',
   },
   [Language.ko_KR]: {
     gameVer: '게임 버전：',
+    dataSource: '게임 데이터 소스：',
   },
 };
 
@@ -49,6 +52,14 @@ export const VersionSelect = ({gameVer, handleVersionSelect}: Props) => {
             );
           })}
         </select>
+        {gameVer === GameVersion.PRiSM ? (
+          <span>
+            {messages.dataSource}{' '}
+            <a href="https://arcade-songs.zetaraku.dev/maimai/about/" target="_blank">
+              zetaraku
+            </a>
+          </span>
+        ) : null}
       </td>
     </tr>
   );
