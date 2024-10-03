@@ -52,14 +52,19 @@ export const VersionSelect = ({gameVer, handleVersionSelect}: Props) => {
             );
           })}
         </select>
-        {gameVer === GameVersion.PRiSM ? (
-          <span>
-            {messages.dataSource}{' '}
+
+        <span>
+          {messages.dataSource}{' '}
+          {gameVer === GameVersion.PRiSM ? (
             <a href="https://arcade-songs.zetaraku.dev/maimai/about/" target="_blank">
               zetaraku
             </a>
-          </span>
-        ) : null}
+          ) : (
+            <a href="https://sgimera.github.io/mai_RatingAnalyzer/" target="_blank">
+              sgimera
+            </a>
+          )}
+        </span>
       </td>
     </tr>
   );
